@@ -1,0 +1,170 @@
+# ---------------------------------------------------------------------------
+# Search terms (agri)
+# ---------------------------------------------------------------------------
+search_terms_root: "C:/Users/aman/Agro_Search_Terms"
+search_term_lists:
+  list1:
+    label: "List 1 - Entire Coverage"
+    folder: "List 1 - Entire Coverage"
+    master_file: "0. ALL ENTITIES - List 1 (Master).csv"
+  list2:
+    label: "List 2 - Top Search Terms"
+    folder: "List 2 - Top Search Terms"
+    master_file: "0. ALL ENTITIES - List 2 (Master).csv"
+
+search_schedule: round_robin   # round_robin | sequential
+term_order: csv                # csv (file/rank order) | random (stable shuffle per country)
+term_shuffle_seed: 42
+
+# ---------------------------------------------------------------------------
+# Smart split (filters)
+#   depth 0: term + country, no filter          -> done if ensun count <= cap
+#   depth 1: each company type ensun shows      -> done if its count <= cap
+#   depth 2: each RELATED industry (config/related_industries.yaml) that has
+#            at least 1 company inside that company type — counts are fetched
+#            first with ensun's quick count query, so 0-company industries cost
+#            no page load
+# ---------------------------------------------------------------------------
+max_companies_per_combo: 100     # ensun free tier: 10 pages x 10 cards
+max_graphql_pages: 10
+fast_pagination: true            # read pages 2-10 from ensun's data (~5x faster); false = click pages
+fast_page_delay_seconds: 1.0     # pause between page requests (bursts get 429/403 within ~4 pages)
+two_pass: true                   # Pass 1 = every term's no-filter search; Pass 2 = filters
+smart_split:
+  order: industry_first          # industry_first | type_first (the earlier method)
+  min_gap: 20                    # split only if at least this many companies are still missing
+  done_tolerance: 2              # stop splitting once found >= ensun count - this
+  max_depth: 2                   # 0 = never split, 1 = one filter level, 2 = two levels
+  use_related_industries: true   # false = use only the top 5 industries ensun shows
+  # Used only if ensun's count panel did not load for a capped search:
+  fallback_company_types: [MANUFACTURER, SERVICE_PROVIDER, DISTRIBUTOR, EDUCATIONAL_INSTITUTION]
+industry_count_concurrency: 4    # parallel count queries (keep low to avoid rate limits)
+facet_wait_seconds: 8            # wait for ensun's count panel after page load
+results_render_wait_seconds: 15  # count says results exist -> wait for cards
+count_mismatch_max_attempts: 3   # fewer cards than ensun's count (none, or paging stalled):
+                                 # retry this many times, then keep the best attempt
+incomplete_results_tolerance: 2  # a shortfall of up to N companies vs ensun's count is accepted
+incomplete_rerun_max_runs: 2     # a saved short result is searched again on resume, up to N runs total
+warm_up_max_seconds: 60          # first run: pass ensun's browser check once
+browser_check_grace_seconds: 15  # 429 browser check: wait this long for it to pass by itself
+                                 # before treating it as a block (0 = old behaviour)
+
+# ---------------------------------------------------------------------------
+# Pacing / page readiness (unchanged from the nutraceutical scraper)
+# ---------------------------------------------------------------------------
+request_delay_seconds: 1.0
+request_delay_seconds_empty: 0.4
+page_ready_poll_ms: 700
+pagination_poll_ms: 500
+cookie_save_every_n_fetches: 25
+fetch_max_retries: 10
+fetch_retry_base_seconds: 5
+fetch_retry_max_seconds: 60
+fetch_retry_rate_limit_seconds: 90
+pagination_max_polls: 40
+pagination_settle_ms: 800
+pagination_empty_retry_polls: 24
+interactive_cookie_refresh_on_captcha: true
+cookie_refresh_on_rate_limit: true
+interactive_forbidden_refresh_seconds: 15
+page_ready_max_polls: 30
+page_ready_min_logos: 3
+page_ready_min_graphql_ok: 1
+# HTTP statuses ensun returns when blocking/rate-limiting a request.
+block_http_codes: [400, 402, 403, 429, 502, 503]
+rate_limit_http_codes: [429]
+empty_page_http_codes: [404]
+block_body_patterns:
+  - forbidden
+  - access denied
+  - captcha
+  - verify you are human
+  - checking your browser
+  - cf-browser-verification
+  - hcaptcha
+  - recaptcha
+graphql_url: "https://api.platform-production.ensun.io/graphql"
+ensun_base_url: "https://ensun.io"
+user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+
+# ---------------------------------------------------------------------------
+# Auto VPN rotate via local Proton VPN automation tool (127.0.0.1 only)
+# ---------------------------------------------------------------------------
+vpn_rotate_on_block: true
+vpn_rotate_service_url: "http://127.0.0.1:8765"
+vpn_rotate_timeout_seconds: 1200
+vpn_rotate_on_all_blocks: true
+vpn_rotate_block_codes: [400, 402, 403, 429, 502, 503]
+vpn_rotate_settle_seconds: 5
+# Keep equal to "vpn_rotate_coalesce_seconds" in the VPN app's config.json: for
+# this long after a switch the app answers new requests with that same switch.
+# A switch is only reused if it finished AFTER the failing request started;
+# if the app hands back the failing server, wait out the rest of this window
+# (at most vpn_stale_reuse_max_waits times), then ask again.
+vpn_rotate_coalesce_seconds: 180
+vpn_stale_reuse_max_waits: 2
+vpn_rotate_before_backoff: true
+vpn_cookie_refresh_on_block: true
+vpn_cookie_refresh_after_rotate: true
+vpn_cookie_refresh_visible: true
+vpn_cookie_refresh_max_seconds: 120
+# After a cookie-tab load, results get this long to appear before a reload.
+vpn_cookie_refresh_reload_seconds: 10
+# One cookie-tab load may take at most this long (was a fixed 120 s blank tab).
+vpn_cookie_refresh_nav_timeout_seconds: 30
+# This many connection failures in a row = the VPN server can't reach ensun.
+vpn_cookie_refresh_dead_after_failures: 2
+# ...then switch server right away, at most this many extra times per block.
+vpn_dead_server_max_switches: 2
+vpn_report_status: true
+scraper_heartbeat_seconds: 10
+session_lock_timeout_seconds: 120
+vpn_resume_ramp_base_seconds: 15
+vpn_resume_ramp_seconds_per_worker: 2
+vpn_resume_ramp_interval_seconds: 1.0
+vpn_recovery_cooldown_per_worker_seconds: 2
+
+# ---------------------------------------------------------------------------
+# Data durability — survives PC restarts and hard crashes
+# ---------------------------------------------------------------------------
+backup_every_n_searches: 50
+backup_keep_count: 1
+export_csv_every_n_searches: 100
+sqlite_synchronous: FULL
+wal_autocheckpoint: 50
+keep_awake: false
+keep_awake_interactive: true   # auto-enabled for interactive runs
+search_run_lock_timeout_seconds: 3
+
+# ---------------------------------------------------------------------------
+# Profile phase tuning (unchanged from the nutraceutical scraper)
+# ---------------------------------------------------------------------------
+profile_http_min_interval_seconds: 0.2
+profile_http_max_concurrent: 6
+profile_http_rate_limit_pause_seconds: 30
+profile_http_block_retries: 5
+profile_post_scrape_delay_seconds: 0.5
+profile_page_ready_poll_ms: 400
+profile_page_ready_max_polls: 25
+profile_tab_settle_ms: 350
+profile_locations_max_polls: 12
+profile_locations_poll_ms: 400
+profile_goto_wait_until: domcontentloaded
+profile_expand_settle_ms: 350
+profile_context_reset_every: 50
+profile_flush_every: 50
+profile_backup_every: 1000
+profile_export_every: 1000
+profile_export_on_run_end_only: true
+profile_log_timings: true
+profile_http_enabled: true
+profile_estimated_seconds_per_profile: 10
+profile_max_workers: 24
+profile_default_workers: 1
+profile_claim_stale_minutes: 30
+profile_claim_reclaim_interval_seconds: 300
+profile_failed_retry_minutes: 30
+profile_cookie_refresh_lock_seconds: 600
+profile_worker_stagger_seconds: 0
+profile_run_lock_timeout_seconds: 5
+sqlite_busy_timeout_ms: 30000

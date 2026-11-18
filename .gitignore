@@ -1,0 +1,30 @@
+# Scraped / generated output
+output/
+logs/
+data/**/*.db
+data/**/*.db-wal
+data/**/*.db-shm
+data/**/*.progress.jsonl
+data/backups/
+data/sessions.db
+
+# Dev captures
+graphql/captured/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+venv/
+.env.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Test cache
+.pytest_cache/

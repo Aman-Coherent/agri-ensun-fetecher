@@ -1,0 +1,73 @@
+# ensun "Industries" filters that matter for this agri project (one list for all
+# search terms). When a company type still has more than 100 companies, the
+# scraper asks ensun how many companies each of these industries holds (a quick
+# count, no page load) and then searches every one that has at least 1 company.
+#
+# Reviewed 2026-11-11 against all 60 options in ensun's "Select industry" dropdown,
+# using the 52 entities of the agri term lists as the yardstick.
+#
+# NOT related — never searched (16):
+#   Gaming, Judiciary, Luxury Goods and Jewelry, Media and Entertainment,
+#   Cyber Security, Defense, Human Resources, Marketing Services, Printing,
+#   Railroad Manufacturing, Real Estate, Semiconductor, Sports, Tobacco,
+#   Travel and Tourism, Business Supplies and Equipment
+#
+# Names must match ensun exactly (commas included) — check with:
+#   python -m pytest -q tests/test_related_industries.py
+
+related_industries:
+  # A. Directly agriculture
+  - Agriculture
+  - Chemicals                         # agrochemicals, fertilizers
+  - Biotechnology                     # seeds, biologicals
+  - Food and Beverage                 # feed, produce, processing
+  - Machinery Manufacturing           # farm machinery
+
+  # B. Agriculture-related (inputs & animal health)
+  - Pharmaceuticals                   # vet medicines; many pesticide makers filed here
+  - Healthcare                        # veterinary
+  - Medical                           # veterinary clinics
+  - Mining                            # potash / phosphate fertilizer
+  - Nanotechnology                    # nano urea / nano DAP
+  - Consumer Goods and Services       # garden & pest products (159 pesticide cos in India)
+
+  # B. Infrastructure & equipment
+  - Manufacturing
+  - Plastics                          # drip pipes, mulch film, tanks
+  - Construction                      # greenhouses
+  - Building Materials
+  - Glass, Ceramics and Concrete      # glasshouses
+  - Packaging                         # silage film / bags
+  - Textile                           # shade nets, coir
+  - Paper and Forest Products         # plantations, coir
+  - Automotive                        # tractors
+  - Maritime and Ship Building        # aquaculture
+  - Utilities                         # water / irrigation
+  - Oil, Energy and Gas               # agri-solar, biogas
+  - Environment, Disposal and Recycling  # compost, biochar, water treatment
+
+  # B. Technology
+  - IT, Software and Services         # farm software
+  - Computer Hardware
+  - Electronics and Electrical engineering  # sensors, grow lights
+  - Automation                        # greenhouse / dairy automation
+  - Aviation and Aerospace            # agri drones
+  - Telecommunications                # farm IoT
+
+  # B. Trade, services, institutions, money
+  - Wholesale
+  - Retail
+  - Import and Export
+  - International Affairs and Trade
+  - Logistics, Supply Chain and Transportation
+  - Consulting
+  - Research
+  - Think Tanks
+  - Business Services                 # certification, testing
+  - Architecture and Planning         # greenhouse / landscape design
+  - Administration                    # ministries, authorities
+  - Education                         # agri institutes
+  - Finance and Insurance             # agri banks, VCs
+
+  # Catch-all: ensun files many unclassified companies here (often the biggest group)
+  - Other

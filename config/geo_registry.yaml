@@ -1,0 +1,136 @@
+# Countries for the agri scrape, grouped by ensun continent code.
+#
+#   name            : display name (also used for the database / output file name)
+#   ensun_location  : "Country,State,City" triple exactly as ensun.io spells it
+#   ensun_aliases   : other spellings accepted on the command line (--country)
+#   phase           : project phase label shown in the country menu
+#
+# Verify spellings against live ensun with:  python -m src.cli verify-geo
+continents:
+  ASIA:
+    ensun_code: ASIA
+    countries:
+      - name: India
+        ensun_location: "India,null,null"
+        phase: 1
+      - name: United Arab Emirates
+        ensun_location: "United Arab Emirates,null,null"
+        ensun_aliases: ["UAE", "United Arab Emirates (UAE)"]
+        phase: 1
+      - name: Saudi Arabia
+        ensun_location: "Saudi Arabia,null,null"
+        phase: 1
+      - name: Kuwait
+        ensun_location: "Kuwait,null,null"
+        phase: 1
+      - name: Oman
+        ensun_location: "Oman,null,null"
+        phase: 1
+      - name: Qatar
+        ensun_location: "Qatar,null,null"
+        phase: 1
+      - name: Bahrain
+        ensun_location: "Bahrain,null,null"
+        phase: 1
+      - name: China
+        ensun_location: "China,null,null"
+        phase: 1
+      - name: Japan
+        ensun_location: "Japan,null,null"
+        phase: 1
+      - name: South Korea
+        ensun_location: "South Korea,null,null"
+        ensun_aliases: ["Korea", "Republic of Korea"]
+        phase: 1
+      - name: Singapore
+        ensun_location: "Singapore,null,null"
+        phase: 1
+  EUROPE:
+    ensun_code: EUROPE
+    countries:
+      - name: Germany
+        ensun_location: "Germany,null,null"
+        phase: 1
+      - name: France
+        ensun_location: "France,null,null"
+        phase: 1
+      - name: United Kingdom
+        ensun_location: "United Kingdom,null,null"
+        ensun_aliases: ["UK"]
+        phase: 1
+      - name: Italy
+        ensun_location: "Italy,null,null"
+        phase: 1
+      - name: Spain
+        ensun_location: "Spain,null,null"
+        phase: 1
+      - name: Denmark
+        ensun_location: "Denmark,null,null"
+        phase: 1
+      - name: Norway
+        ensun_location: "Norway,null,null"
+        phase: 1
+      - name: Sweden
+        ensun_location: "Sweden,null,null"
+        phase: 1
+      - name: Belgium
+        ensun_location: "Belgium,null,null"
+        phase: 1
+      - name: Netherlands
+        ensun_location: "Netherlands,null,null"
+        ensun_aliases: ["The Netherlands"]
+        phase: 1
+      - name: Luxembourg
+        ensun_location: "Luxembourg,null,null"
+        phase: 1
+  AFRICA:
+    ensun_code: AFRICA
+    countries:
+      - name: Nigeria
+        ensun_location: "Nigeria,null,null"
+        phase: 2
+      - name: Egypt
+        ensun_location: "Egypt,null,null"
+        phase: 2
+      - name: Algeria
+        ensun_location: "Algeria,null,null"
+        phase: 2
+      - name: South Africa
+        ensun_location: "South Africa,null,null"
+        phase: 2
+      - name: Ethiopia
+        ensun_location: "Ethiopia,null,null"
+        phase: 2
+      - name: Tanzania
+        ensun_location: "Tanzania,null,null"
+        phase: 2
+      # ensun's location filter spells it WITHOUT the accent (verified 2026-11-11:
+      # "Côte d'Ivoire" and "Ivory Coast" return 0, "Cote d'Ivoire" returns results).
+      # Company cards still display "Côte d'Ivoire".
+      - name: Cote d'Ivoire
+        ensun_location: "Cote d'Ivoire,null,null"
+        ensun_aliases: ["Côte d'Ivoire", "Ivory Coast", "Cote dIvoire"]
+        phase: 2
+      - name: Mali
+        ensun_location: "Mali,null,null"
+        phase: 2
+      - name: Ghana
+        ensun_location: "Ghana,null,null"
+        phase: 2
+      # ensun uses "The Gambia" ("Gambia" returns 0). Verified 2026-11-11.
+      - name: The Gambia
+        ensun_location: "The Gambia,null,null"
+        ensun_aliases: ["Gambia"]
+        phase: 2
+      - name: Uganda
+        ensun_location: "Uganda,null,null"
+        phase: 2
+      # Spelling confirmed by ensun's own location suggestions (GetLocationFilterSuggestions),
+      # but ensun has almost no companies located here (0 for agriculture/cashew/services).
+      - name: Guinea-Bissau
+        ensun_location: "Guinea-Bissau,null,null"
+        ensun_aliases: ["Guinea Bissau"]
+        phase: 2
+      - name: Sudan
+        ensun_location: "Sudan,null,null"
+        phase: 2
