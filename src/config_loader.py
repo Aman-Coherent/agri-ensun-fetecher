@@ -42,13 +42,24 @@ def related_industries() -> list[str]:
 
 
 def search_terms_root() -> Path:
-    """Folder holding 'List 1 - Entire Coverage' / 'List 2 - Top Search Terms'."""
+    """Folder holding 'List 1 - Entire Coverage' / 'List 2 - Top Search Terms'.
+
+    The configured folder is used when it exists. On another PC (different
+    Windows user name, so ``C:/Users/<name>/...`` differs) a folder with the
+    same name in the user's home folder or the project folder is used instead,
+    so settings.yaml never needs a per-PC edit (which would block ``git pull``).
+    """
     raw = str(settings().get("search_terms_root", "")).strip()
     if not raw:
         raise ValueError("settings.yaml: search_terms_root is not set")
-    path = Path(raw)
+    path = Path(raw).expanduser()
     if not path.is_absolute():
         path = PROJECT_ROOT / path
+    if path.exists():
+        return path
+    for candidate in (Path.home() / path.name, PROJECT_ROOT / path.name):
+        if candidate.exists():
+            return candidate
     return path
 
 
