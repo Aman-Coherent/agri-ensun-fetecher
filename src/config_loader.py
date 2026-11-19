@@ -41,26 +41,107 @@ def related_industries() -> list[str]:
     return [str(x) for x in (load_yaml("related_industries.yaml").get("related_industries") or [])]
 
 
-def search_terms_root() -> Path:
-    """Folder holding 'List 1 - Entire Coverage' / 'List 2 - Top Search Terms'.
-
-    The configured folder is used when it exists. On another PC (different
-    Windows user name, so ``C:/Users/<name>/...`` differs) a folder with the
-    same name in the user's home folder or the project folder is used instead,
-    so settings.yaml never needs a per-PC edit (which would block ``git pull``).
-    """
+def _configured_search_terms_root() -> Path:
     raw = str(settings().get("search_terms_root", "")).strip()
     if not raw:
         raise ValueError("settings.yaml: search_terms_root is not set")
     path = Path(raw).expanduser()
     if not path.is_absolute():
         path = PROJECT_ROOT / path
-    if path.exists():
-        return path
-    for candidate in (Path.home() / path.name, PROJECT_ROOT / path.name):
-        if candidate.exists():
-            return candidate
     return path
+
+
+def term_list_folder_names() -> list[str]:
+    """Sub-folder names the search-terms folder must hold (from settings.yaml)."""
+    lists = settings().get("search_term_lists") or {}
+    return [
+        str(block["folder"])
+        for block in lists.values()
+        if isinstance(block, dict) and block.get("folder")
+    ]
+
+
+def search_terms_candidates() -> list[Path]:
+    """Every place the search-terms folder is looked for, in order.
+
+    The configured path first; then a folder with the same name in the usual
+    places a copied folder ends up on another PC (home, project, Desktop,
+    Downloads, Documents, OneDrive), each also one level deeper because
+    unzipping often adds an extra folder of the same name.
+    """
+    configured = _configured_search_terms_root()
+    name = configured.name
+    home = Path.home()
+    bases = [
+        home,
+        PROJECT_ROOT,
+        PROJECT_ROOT.parent,
+        home / "Desktop",
+        home / "Downloads",
+        home / "Documents",
+    ]
+    try:
+        onedrives = sorted(p for p in home.glob("OneDrive*") if p.is_dir())
+    except OSError:
+        onedrives = []
+    for onedrive in onedrives:
+        bases += [onedrive, onedrive / "Desktop", onedrive / "Documents"]
+
+    candidates: list[Path] = []
+    for folder in [configured, *(base / name for base in bases)]:
+        for candidate in (folder, folder / name):
+            if candidate not in candidates:
+                candidates.append(candidate)
+    return candidates
+
+
+def looks_like_search_terms_folder(folder: Path) -> bool:
+    list_folders = term_list_folder_names()
+    if not list_folders:
+        return folder.is_dir()
+    return any((folder / sub).is_dir() for sub in list_folders)
+
+
+def search_terms_root() -> Path:
+    """Folder holding 'List 1 - Entire Coverage' / 'List 2 - Top Search Terms'.
+
+    The configured folder is used when it holds the lists. On another PC
+    (different Windows user name, so ``C:/Users/<name>/...`` differs) the first
+    candidate from ``search_terms_candidates`` that holds them is used, so
+    settings.yaml never needs a per-PC edit (which would block ``git pull``).
+    Nothing found -> the configured path (the caller reports it missing).
+    """
+    candidates = search_terms_candidates()
+    for candidate in candidates:
+        if looks_like_search_terms_folder(candidate):
+            return candidate
+    return candidates[0]
+
+
+def missing_search_terms_help() -> str:
+    """Plain-English help for when the search-terms folder can't be found."""
+    configured = _configured_search_terms_root()
+    target = Path.home() / configured.name
+    subs = term_list_folder_names()
+    lines = [
+        f"The scraper needs the '{configured.name}' folder (copy it from the main PC).",
+        f"Put it here:  {target}",
+    ]
+    if subs:
+        lines.append(
+            "Directly inside it there must be the folders: "
+            + ", ".join(f"'{s}'" for s in subs)
+        )
+    lines.append("Places checked:")
+    for candidate in search_terms_candidates():
+        if not candidate.exists():
+            state = "not found"
+        elif looks_like_search_terms_folder(candidate):
+            state = "found, but the list file inside is missing"
+        else:
+            state = "exists, but the list folders are not directly inside"
+        lines.append(f"  - {candidate}  ({state})")
+    return "\n".join(lines)
 
 
 def country_slug(name: str) -> str:

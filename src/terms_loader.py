@@ -19,9 +19,18 @@ import random
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from src.config_loader import search_terms_root, settings, term_key
+from src.config_loader import (
+    missing_search_terms_help,
+    search_terms_root,
+    settings,
+    term_key,
+)
 
 REQUIRED_COLUMNS = ("Category", "Entity #", "Entity", "Search Term")
+
+
+class SearchTermsNotFoundError(FileNotFoundError):
+    """The master CSV is missing; the message tells the user where to put it."""
 
 
 @dataclass(frozen=True)
@@ -102,7 +111,10 @@ def load_term_list(list_id: str, path: Path | None = None) -> TermList:
     """Read a master CSV into ordered entities; duplicates within an entity are dropped."""
     csv_path = path or master_csv_path(list_id)
     if not csv_path.exists():
-        raise FileNotFoundError(f"Search term file not found: {csv_path}")
+        message = f"Search term file not found: {csv_path}"
+        if path is None:
+            message += "\n\n" + missing_search_terms_help()
+        raise SearchTermsNotFoundError(message)
     label = list_definitions().get(list_id, {}).get("label", list_id)
 
     entities: dict[str, Entity] = {}

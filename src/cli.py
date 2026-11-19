@@ -527,7 +527,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    args.func(args)
+    from src.terms_loader import SearchTermsNotFoundError
+
+    try:
+        args.func(args)
+    except SearchTermsNotFoundError as exc:
+        # A setup problem, not a bug: show the instructions, not a traceback.
+        raise SystemExit(f"\n{exc}") from None
 
 
 if __name__ == "__main__":
