@@ -29,5 +29,4 @@ Thumbs.db
 # Test cache
 .pytest_cache/
 
-# Search-term lists are private - never upload them
-Agro_Search_Terms/
+
